@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHOTO BINGO</title>
+    <title>30 Fes PHOTO BINGO</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f0f4f4; text-align: center; }
+        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f8f9fa; text-align: center; }
         h1 { color: #2c3e50; margin-bottom: 5px; font-style: italic; }
         p.subtitle { color: #666; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
         
@@ -14,22 +14,12 @@
         }
         .progress-text { font-size: 13px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; text-align: left; }
         .progress-bar { background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden; }
-        .progress-fill {
-            appearance: none;
-            display: block;
-            width: 100%;
-            height: 8px;
-            border: 0;
-            background: transparent;
-        }
-        .progress-fill::-webkit-progress-bar { background: transparent; }
-        .progress-fill::-webkit-progress-value { background: #27ae60; transition: width 0.3s; }
-        .progress-fill::-moz-progress-bar { background: #27ae60; transition: width 0.3s; }
+        .progress-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -38,37 +28,44 @@
         }
         
         .card {
-            background: white;
-            border: 2px solid #dcdde1;
+            border: 2px solid rgba(0,0,0,0.08);
             border-radius: 12px;
-            padding: 8px;
+-           padding: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
             aspect-ratio: 1 / 1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             position: relative;
         }
-        .card.completed { border-color: #27ae60; background: #e8f8f5; }
-        
-        .card-number {
-            position: absolute; top: 6px; left: 8px; font-size: 11px; font-weight: bold; color: #7f8c8d;
-        }
+        .card.completed { border-color: #27ae60; }
         
         .photo-area {
-            width: 65px; height: 65px; border-radius: 50%; overflow: hidden; margin-top: 15px; background: #f1f2f6; display: flex; align-items: center; justify-content: center; position: relative;
+            width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-top: 10px; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .card.completed .photo-area { border: 2px solid #27ae60; }
+        .card.completed .photo-area { border: 2px solid #27ae60; margin-top: 5px; }
         .photo-area img { width: 100%; height: 100%; object-fit: cover; }
-        .placeholder-icon { font-size: 18px; color: #b2bec3; }
+        
+        .number-display {
+            font-size: 22px; font-weight: 800; color: #2c3e50;
+        }
 
         input[type="file"] { display: none; }
         .upload-btn {
-            background: #3498db; color: white; padding: 4px 10px; font-size: 11px;
-            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold;
+            background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; font-size: 11px;
+            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold; margin-bottom: 2px;
         }
         .card.completed .upload-btn { background: #27ae60; }
+
+        /* カラーバリエーション（違いがはっきり分かるように調整） */
+        .bg-blue { background-color: #cce0ff; }       /* すっきりした青 */
+        .bg-yellow { background-color: #fff3bf; }    /* 明るい黄色 */
+        .bg-purple { background-color: #d0bfff; }    /* しっかりした青みパープル */
+        .bg-orange { background-color: #ffd8a8; }    /* 鮮やかなオレンジ */
+        .bg-pink { background-color: #ffdeeb; }      /* はっきりしたローズピンク */
+        .bg-green { background-color: #b2f2bb; }     /* 爽やかな緑 */
+        .bg-red { background-color: #ff8787; }       /* 濃いめの赤 */
     </style>
 </head>
 <body>
@@ -79,20 +76,28 @@
     <div class="progress-container">
         <div class="progress-text">{{ completed_count }} / 30 PHOTOS UPLOADED</div>
         <div class="progress-bar">
-            <progress class="progress-fill" value="{{ completed_count }}" max="30" aria-label="アップロード済み写真"></progress>
+            <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
         </div>
     </div>
 
     <div class="grid">
         {% for item in items %}
-        <div class="card {% if item.image_url %}completed{% endif %}">
-            <span class="card-number">{{ item.id }}</span>
-            
+            {% set color_class = "bg-blue" %}
+            {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
+            {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
+            {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
+            {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
+            {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
+            {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
+            {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
+            {% endif %}
+
+        <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
             <div class="photo-area">
                 {% if item.image_url %}
                     <img src="{{ item.image_url }}" alt="Photo">
                 {% else %}
-                    <span class="placeholder-icon">📷</span>
+                    <span class="number-display">{{ item.id }}</span>
                 {% endif %}
             </div>
 
