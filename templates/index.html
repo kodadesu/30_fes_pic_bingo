@@ -5,14 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>30 Fes PHOTO BINGO</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f8f9fa; text-align: center; }
-        h1 { color: #2c3e50; margin-bottom: 5px; font-style: italic; }
-        p.subtitle { color: #666; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
+        
+        /* トップのメインバナー画像エリア */
+        .header-banner {
+            width: 100%;
+            max-height: 250px;
+            background-color: #f0f0f0; /* 余白が出たときになじむ濃い背景色 */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-banner img {
+            width: 100%;
+            height: 100%;
+            max-height: 250px;
+            object-fit: contain; /* 画像の全体が収まるようにする設定 */
+        }
+
+        .content-wrap {
+            padding: 15px;
+        }
+
+        h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 24px; }
+        p.subtitle { color: #666; font-size: 13px; margin-top: 0; margin-bottom: 15px; }
         
         .progress-container {
-            max-width: 600px; margin: 0 auto 20px auto; background: #fff; padding: 10px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 10px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .progress-text { font-size: 13px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; text-align: left; }
+        .progress-text { font-size: 12px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; text-align: left; }
         .progress-bar { background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden; }
         .progress-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
 
@@ -68,45 +90,52 @@
 </head>
 <body>
 
-    <h1>30 Fes PHOTO BINGO</h1>
-    <p class="subtitle">Explore, Take Photos, and Fill Year Board!</p>
-
-    <div class="progress-container">
-        <div class="progress-text">{{ completed_count }} / 30 PHOTOS UPLOADED</div>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
-        </div>
+    <!-- ヘッダーバナーエリア（staticフォルダ内の画像を表示） -->
+    <div class="header-banner">
+        <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
     </div>
 
-    <div class="grid">
-        {% for item in items %}
-            {% set color_class = "bg-blue" %}
-            {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
-            {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
-            {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
-            {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
-            {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
-            {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
-            {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
-            {% endif %}
+    <div class="content-wrap">
+        <h1>30 Fes PHOTO BINGO</h1>
+        <p class="subtitle">Explore, Take Photos, and Fill Your Board!</p>
 
-        <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
-            <div class="photo-area">
-                {% if item.image_url %}
-                    <img src="{{ item.image_url }}" alt="Photo">
-                {% else %}
-                    <span class="number-display">{{ item.id }}</span>
-                {% endif %}
+        <div class="progress-container">
+            <div class="progress-text">{{ completed_count }} / 30 PHOTOS UPLOADED</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
             </div>
-
-            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
-                <label class="upload-btn">
-                    {% if item.image_url %}変更{% else %}撮影{% endif %}
-                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
-                </label>
-            </form>
         </div>
-        {% endfor %}
+
+        <div class="grid">
+            {% for item in items %}
+                {% set color_class = "bg-blue" %}
+                {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
+                {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
+                {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
+                {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
+                {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
+                {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
+                {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
+                {% endif %}
+
+            <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
+                <div class="photo-area">
+                    {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="Photo">
+                    {% else %}
+                        <span class="number-display">{{ item.id }}</span>
+                    {% endif %}
+                </div>
+
+                <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
+                    <label class="upload-btn">
+                        {% if item.image_url %}変更{% else %}撮影{% endif %}
+                        <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                    </label>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
 </body>
