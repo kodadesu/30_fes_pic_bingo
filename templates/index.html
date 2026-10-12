@@ -102,7 +102,7 @@
             <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
                 <label class="upload-btn">
                     {% if item.image_url %}変更{% else %}撮影{% endif %}
-                    <input type="file" name="image" accept="image/*" capture="environment" onchange="this.form.submit()">
+                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
                 </label>
             </form>
         </div>
