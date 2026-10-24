@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>30 Fes PHOTO BINGO</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
         
         /* トップのメインバナー画像エリア */
         .header-banner {
@@ -25,67 +26,90 @@
         }
 
         .content-wrap {
-            padding: 15px;
+            padding: 12px;
         }
 
-        h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 24px; }
-        p.subtitle { color: #666; font-size: 13px; margin-top: 0; margin-bottom: 15px; }
+        h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 22px; }
+        p.subtitle { color: #666; font-size: 12px; margin-top: 2px; margin-bottom: 12px; }
         
+        /* 進捗コンテナ & ダウンロードボタン */
         .progress-container {
-            max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 10px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 12px 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .progress-text { font-size: 12px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; text-align: left; }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+        }
+        .progress-text { font-size: 12px; font-weight: bold; color: #2c3e50; }
+        .download-btn {
+            background: #2c3e50; color: white; border: none; padding: 5px 12px; font-size: 11px;
+            border-radius: 15px; cursor: pointer; font-weight: bold; transition: background 0.2s;
+        }
+        .download-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
         .progress-bar { background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden; }
         .progress-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
 
-        /* スマホでもPCでも常に横5マスに固定 */
+        /* グリッドレイアウト（横5列固定） */
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            gap: 6px;
             max-width: 600px;
             margin: 0 auto;
         }
         
-        /* --- 未登録のカードのデザイン --- */
+        /* フォームとラベルも完全に正方形を維持する設定 */
+        .grid-form {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            margin: 0;
+            padding: 0;
+        }
+        .grid-label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* カードの共通スタイル (必ず1:1の正方形にする) */
         .card {
+            width: 100%;
+            height: 100%;
             border: 2px solid rgba(0,0,0,0.08);
             border-radius: 10px;
-            padding: 6px;
+            padding: 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            aspect-ratio: 1 / 1;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             position: relative;
-            background-clip: padding-box;
+            overflow: hidden;
         }
         
-        /* 丸い数字エリア */
+        /* 未登録（丸型数字＋アップロードボタン） */
         .photo-area {
-            width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-top: 6px; 
-            background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; position: relative;
+            width: 38px; height: 38px; border-radius: 50%; overflow: hidden; margin-top: 2px;
+            background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .number-display {
-            font-size: 16px; font-weight: 800; color: #2c3e50;
+            font-size: 15px; font-weight: 800; color: #2c3e50;
         }
 
-        /* 未登録のアップロードボタン */
         .upload-btn {
-            background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; font-size: 10px;
-            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold; margin-bottom: 2px;
+            background: rgba(0,0,0,0.65); color: white; padding: 2px 6px; font-size: 9px;
+            border-radius: 12px; font-weight: bold; margin-bottom: 2px;
+            white-space: nowrap;
         }
 
-        /* --- 登録済み（completed）のカードのデザイン --- */
+        /* 登録済み（completed） */
         .card.completed { 
             border-color: #27ae60; 
-            padding: 0; /* 登録済みはカードいっぱいに写真を表示するためパディングをゼロに */
-            overflow: hidden;
-            cursor: pointer;
+            padding: 0;
         }
         
-        /* カード全体に広がる写真 */
         .card.completed .full-photo {
             position: absolute;
             top: 0;
@@ -93,10 +117,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 8px; /* カードの角丸に合わせる */
         }
 
-        /* 写真の上にうっすら重ねる「変更」用レイヤー（ホバーやタップ時に分かりやすくする） */
         .card.completed .overlay-change {
             position: absolute;
             bottom: 0;
@@ -106,18 +128,13 @@
             color: white;
             font-size: 9px;
             font-weight: bold;
-            padding: 3px 0;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        /* スマホ等でタップしやすく常に下部に薄く出すか、または常に表示するなら opacity: 1; にできます */
-        .card.completed:hover .overlay-change {
-            opacity: 1;
+            padding: 2px 0;
+            text-align: center;
         }
 
         input[type="file"] { display: none; }
 
-        /* カラーバリエーション（未登録時） */
+        /* 背景カラーバリエーション */
         .bg-blue { background-color: #cce0ff; }
         .bg-yellow { background-color: #fff3bf; }
         .bg-purple { background-color: #d0bfff; }
@@ -139,7 +156,13 @@
         <p class="subtitle">撮った写真をuploadしてください！</p>
 
         <div class="progress-container">
-            <div class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</div>
+            <div class="progress-header">
+                <span class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</span>
+                <!-- 合成画像ダウンロードボタン -->
+                <button id="downloadBingoBtn" class="download-btn" onclick="generateBingoImage()" {% if completed_count == 0 %}disabled{% endif %}>
+                    画像として保存 📥
+                </button>
+            </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
             </div>
@@ -157,32 +180,119 @@
                 {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
                 {% endif %}
 
-            <!-- 共通のカードフォーム（全体をファイル選択のトリガーにすることも可能） -->
-            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="margin: 0;">
-                <label style="display: block; width: 100%; height: 100%; cursor: pointer;">
-                    
+            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" class="grid-form">
+                <label class="grid-label">
                     <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
                         {% if item.image_url %}
-                            <!-- 【写真アップロード後】カードいっぱいに画像を表示 -->
-                            <img src="{{ item.image_url }}" alt="Photo" class="full-photo">
+                            <img src="{{ item.image_url }}" alt="Photo" class="full-photo" data-src="{{ item.image_url }}" data-id="{{ item.id }}">
                             <div class="overlay-change">変更</div>
                         {% else %}
-                            <!-- 【写真アップロード前】1枚目の画像のような丸型＋数字＋アップロードボタン -->
                             <div class="photo-area">
                                 <span class="number-display">{{ item.id }}</span>
                             </div>
                             <span class="upload-btn">アップロード</span>
                         {% endif %}
                     </div>
-
-                    <!-- 隠しファイル選択 input -->
                     <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
                 </label>
             </form>
-
             {% endfor %}
         </div>
     </div>
 
+    <!-- 合成処理用JavaScript -->
+    <script>
+        async function generateBingoImage() {
+            const btn = document.getElementById('downloadBingoBtn');
+            btn.innerText = '作成中...⏳';
+            btn.disabled = true;
+
+            const cols = 5;
+            const rows = 6;
+            const cardSize = 300; // 高画質化のため1マス 300x300px で描画
+            const gap = 10;
+            const headerHeight = 150;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = cols * cardSize + (cols + 1) * gap;
+            canvas.height = rows * cardSize + (rows + 1) * gap + headerHeight;
+            const ctx = canvas.getContext('2d');
+
+            // 背景描画
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // タイトル描画
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold italic 48px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('30 Fes PHOTO BINGO', canvas.width / 2, 90);
+
+            // 1〜30マスの描画処理
+            const cards = document.querySelectorAll('.card');
+            
+            for (let index = 0; index < cards.length; index++) {
+                const card = cards[index];
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                const x = gap + col * (cardSize + gap);
+                const y = headerHeight + gap + row * (cardSize + gap);
+
+                // マス目の角丸描画
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(x, y, cardSize, cardSize, 20);
+                ctx.clip();
+
+                const imgElement = card.querySelector('img.full-photo');
+                
+                if (imgElement) {
+                    // 写真がある場合：Cloudinaryから画像を取得して描画
+                    try {
+                        const img = new Image();
+                        img.crossOrigin = 'Anonymous'; // CORS対策
+                        img.src = imgElement.getAttribute('data-src');
+                        await new Promise((resolve, reject) => {
+                            img.onload = resolve;
+                            img.onerror = resolve; // エラー時もスキップして進行
+                        });
+                        
+                        // 画像をカバーフィットで描画
+                        const scale = Math.max(cardSize / img.width, cardSize / img.height);
+                        const sw = img.width * scale;
+                        const sh = img.height * scale;
+                        ctx.drawImage(img, x + (cardSize - sw) / 2, y + (cardSize - sh) / 2, sw, sh);
+                    } catch (e) {
+                        console.error('Image load error', e);
+                    }
+                } else {
+                    // 写真がない場合：背景色と数字を描画
+                    ctx.fillStyle = '#e0e0e0';
+                    ctx.fillRect(x, y, cardSize, cardSize);
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(x + cardSize / 2, y + cardSize / 2 - 20, 50, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.font = 'bold 45px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(index + 1, x + cardSize / 2, y + cardSize / 2 - 20);
+                }
+                ctx.restore();
+            }
+
+            // 画像のダウンロード処理
+            const link = document.createElement('a');
+            link.download = '30_fes_photo_bingo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            btn.innerText = '30枚の合体画像保存';
+            btn.disabled = false;
+        }
+    </script>
 </body>
 </html>
