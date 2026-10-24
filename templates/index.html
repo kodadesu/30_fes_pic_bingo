@@ -144,7 +144,7 @@
             <div class="progress-header">
                 <span class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</span>
                 <button id="downloadBingoBtn" class="download-btn" onclick="generateBingoImage()" {% if completed_count == 0 %}disabled{% endif %}>
-                    アップロードされた写真のコラージュ保存 
+                    画像保存 
                 </button>
             </div>
             <div class="progress-bar">
@@ -288,7 +288,7 @@
             document.getElementById('previewImage').src = dataUrl;
             document.getElementById('imageModal').style.display = 'flex';
 
-            btn.innerText = 'スマホに画像保存 ';
+            btn.innerText = '画像保存 ';
             btn.disabled = false;
         }
 
