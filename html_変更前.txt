@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Fes PHOTO BINGO</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
+        
+        /* トップのメインバナー画像エリア */
+        .header-banner {
+            width: 100%;
+            max-height: 250px;
+            background-color: #f0f0f0; /* 余白が出たときになじむ濃い背景色 */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-banner img {
+            width: 100%;
+            height: 100%;
+            max-height: 250px;
+            object-fit: contain; /* 画像の全体が収まるようにする設定 */
+        }
+
+        .content-wrap {
+            padding: 15px;
+        }
+
+        h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 24px; }
+        p.subtitle { color: #666; font-size: 13px; margin-top: 0; margin-bottom: 15px; }
+        
+        .progress-container {
+            max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 10px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-text { font-size: 12px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; text-align: left; }
+        .progress-bar { background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden; }
+        .progress-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
+
+        /* スマホでもPCでも常に横5マスに固定 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 10px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .card.completed { border-color: #27ae60; }
+        
+        /* 写真が登録されているとき、カードいっぱいに表示するスタイル */
+        .card.completed .bg-photo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        .photo-area {
+            width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-top: 6px; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .card.completed .photo-area { border: 2px solid #27ae60; margin-top: 3px; }
+        .photo-area img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .number-display {
+            font-size: 16px; font-weight: 800; color: #2c3e50;
+        }
+
+        input[type="file"] { display: none; }
+        .upload-btn {
+            background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; font-size: 10px;
+            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold; margin-bottom: 2px;
+        }
+        .card.completed .upload-btn { background: #27ae60; }
+
+        /* カラーバリエーション */
+        .bg-blue { background-color: #cce0ff; }
+        .bg-yellow { background-color: #fff3bf; }
+        .bg-purple { background-color: #d0bfff; }
+        .bg-orange { background-color: #ffd8a8; }
+        .bg-pink { background-color: #ffdeeb; }
+        .bg-green { background-color: #b2f2bb; }
+        .bg-red { background-color: #ff8787; }
+    </style>
+</head>
+<body>
+
+    <!-- ヘッダーバナーエリア（staticフォルダ内の画像を表示） -->
+    <div class="header-banner">
+        <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
+    </div>
+
+    <div class="content-wrap">
+        <h1>30 Fes PHOTO BINGO</h1>
+        <p class="subtitle">撮った写真をuploadしてください！</p>
+
+        <div class="progress-container">
+            <div class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
+            </div>
+        </div>
+
+        <div class="grid">
+            {% for item in items %}
+                {% set color_class = "bg-blue" %}
+                {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
+                {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
+                {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
+                {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
+                {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
+                {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
+                {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
+                {% endif %}
+
+            <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
+                <div class="photo-area">
+                    {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="Photo">
+                    {% else %}
+                        <span class="number-display">{{ item.id }}</span>
+                    {% endif %}
+                </div>
+
+                <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
+                    <label class="upload-btn">
+                        {% if item.image_url %}変更{% else %}アップロード{% endif %}
+                        <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                    </label>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

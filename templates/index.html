@@ -11,7 +11,7 @@
         .header-banner {
             width: 100%;
             max-height: 250px;
-            background-color: #f0f0f0; /* 余白が出たときになじむ濃い背景色 */
+            background-color: #f0f0f0;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -21,7 +21,7 @@
             width: 100%;
             height: 100%;
             max-height: 250px;
-            object-fit: contain; /* 画像の全体が収まるようにする設定 */
+            object-fit: contain;
         }
 
         .content-wrap {
@@ -47,6 +47,7 @@
             margin: 0 auto;
         }
         
+        /* --- 未登録のカードのデザイン --- */
         .card {
             border: 2px solid rgba(0,0,0,0.08);
             border-radius: 10px;
@@ -58,38 +59,65 @@
             aspect-ratio: 1 / 1;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             position: relative;
-            overflow: hidden;
+            background-clip: padding-box;
         }
-        .card.completed { border-color: #27ae60; }
         
-        /* 写真が登録されているとき、カードいっぱいに表示するスタイル */
-        .card.completed .bg-photo {
+        /* 丸い数字エリア */
+        .photo-area {
+            width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-top: 6px; 
+            background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .number-display {
+            font-size: 16px; font-weight: 800; color: #2c3e50;
+        }
+
+        /* 未登録のアップロードボタン */
+        .upload-btn {
+            background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; font-size: 10px;
+            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold; margin-bottom: 2px;
+        }
+
+        /* --- 登録済み（completed）のカードのデザイン --- */
+        .card.completed { 
+            border-color: #27ae60; 
+            padding: 0; /* 登録済みはカードいっぱいに写真を表示するためパディングをゼロに */
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        /* カード全体に広がる写真 */
+        .card.completed .full-photo {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 1;
+            border-radius: 8px; /* カードの角丸に合わせる */
         }
-        .photo-area {
-            width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-top: 6px; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; position: relative;
+
+        /* 写真の上にうっすら重ねる「変更」用レイヤー（ホバーやタップ時に分かりやすくする） */
+        .card.completed .overlay-change {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 0;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
-        .card.completed .photo-area { border: 2px solid #27ae60; margin-top: 3px; }
-        .photo-area img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .number-display {
-            font-size: 16px; font-weight: 800; color: #2c3e50;
+        /* スマホ等でタップしやすく常に下部に薄く出すか、または常に表示するなら opacity: 1; にできます */
+        .card.completed:hover .overlay-change {
+            opacity: 1;
         }
 
         input[type="file"] { display: none; }
-        .upload-btn {
-            background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; font-size: 10px;
-            border-radius: 20px; cursor: pointer; display: inline-block; font-weight: bold; margin-bottom: 2px;
-        }
-        .card.completed .upload-btn { background: #27ae60; }
 
-        /* カラーバリエーション */
+        /* カラーバリエーション（未登録時） */
         .bg-blue { background-color: #cce0ff; }
         .bg-yellow { background-color: #fff3bf; }
         .bg-purple { background-color: #d0bfff; }
@@ -101,7 +129,7 @@
 </head>
 <body>
 
-    <!-- ヘッダーバナーエリア（staticフォルダ内の画像を表示） -->
+    <!-- ヘッダーバナーエリア -->
     <div class="header-banner">
         <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
     </div>
@@ -129,24 +157,29 @@
                 {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
                 {% endif %}
 
-            <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
-                {% if item.image_url %}
-                    <!-- 写真が登録されている場合はカード全体に表示 -->
-                    <img src="{{ item.image_url }}" alt="Photo" class="bg-photo">
-                {% else %}
-                    <!-- 未登録の場合は数字を表示 -->
-                    <div class="number-area">
-                        <span class="number-display">{{ item.id }}</span>
+            <!-- 共通のカードフォーム（全体をファイル選択のトリガーにすることも可能） -->
+            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="margin: 0;">
+                <label style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                    
+                    <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
+                        {% if item.image_url %}
+                            <!-- 【写真アップロード後】カードいっぱいに画像を表示 -->
+                            <img src="{{ item.image_url }}" alt="Photo" class="full-photo">
+                            <div class="overlay-change">変更</div>
+                        {% else %}
+                            <!-- 【写真アップロード前】1枚目の画像のような丸型＋数字＋アップロードボタン -->
+                            <div class="photo-area">
+                                <span class="number-display">{{ item.id }}</span>
+                            </div>
+                            <span class="upload-btn">アップロード</span>
+                        {% endif %}
                     </div>
-                {% endif %}
 
-                <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
-                    <label class="upload-btn">
-                        {% if item.image_url %}変更{% else %}アップロード{% endif %}
-                        <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
-                    </label>
-                </form>
-            </div>
+                    <!-- 隠しファイル選択 input -->
+                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                </label>
+            </form>
+
             {% endfor %}
         </div>
     </div>
