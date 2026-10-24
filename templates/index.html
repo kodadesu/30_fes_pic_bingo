@@ -97,10 +97,10 @@
 
     <div class="content-wrap">
         <h1>30 Fes PHOTO BINGO</h1>
-        <p class="subtitle">Explore, Take Photos, and Fill Your Board!</p>
+        <p class="subtitle">撮った写真をuploadしてください！</p>
 
         <div class="progress-container">
-            <div class="progress-text">{{ completed_count }} / 30 PHOTOS UPLOADED</div>
+            <div class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
             </div>
@@ -129,7 +129,7 @@
 
                 <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data">
                     <label class="upload-btn">
-                        {% if item.image_url %}変更{% else %}撮影{% endif %}
+                        {% if item.image_url %}変更{% else %}アップロード{% endif %}
                         <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
                     </label>
                 </form>

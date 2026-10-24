@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
 from dotenv import load_dotenv
 
 # .envファイルから環境変数を読み込む
@@ -17,13 +18,36 @@ cloudinary.config(
 
 app = Flask(__name__)
 
-# 30個のビンゴマス（お題）のデータ
-bingo_items = {
-    i: {"id": i, "title": f"お題 {i}", "image_url": None} for i in range(1, 31)
-}
+def get_bingo_items():
+    """Cloudinaryの '30_fes' フォルダから保存済みの画像を自動取得してビンゴの状態を復元する"""
+    items = {i: {"id": i, "title": f"お題 {i}", "image_url": None} for i in range(1, 31)}
+    
+    try:
+        # '30_fes' フォルダ内のリソース（画像）を最大30件取得
+        result = cloudinary.api.resources(
+            type="upload",
+            prefix="30_fes/",
+            max_results=50
+        )
+        
+        for resource in result.get("resources", []):
+            public_id = resource.get("public_id") # 例: "30_fes/item_5"
+            secure_url = resource.get("secure_url")
+            
+            # public_id から "item_X" の番号を抽出して紐付ける
+            for i in range(1, 31):
+                if public_id == f"30_fes/item_{i}":
+                    items[i]["image_url"] = secure_url
+                    break
+    except Exception as e:
+        print(f"Cloudinaryからのデータ読み込みエラー: {e}")
+        
+    return items
 
 @app.route('/')
 def index():
+    # アクセスのたびにCloudinaryから最新の状態を取得するため、リロードでデータが消えません
+    bingo_items = get_bingo_items()
     completed_count = sum(1 for item in bingo_items.values() if item["image_url"] is not None)
     return render_template('index.html', items=bingo_items.values(), completed_count=completed_count)
 
@@ -38,13 +62,13 @@ def upload(item_id):
     
     if file:
         try:
-            # Cloudinaryへ画像をアップロード
-            upload_result = cloudinary.uploader.upload(file)
-            # Cloudinary上の安全な画像URLを取得
-            image_url = upload_result.get("secure_url")
-            
-            # 該当マスの画像URLを更新
-            bingo_items[item_id]["image_url"] = image_url
+            # 30_fesフォルダに "item_1", "item_2" などの固定IDで保存 (overwrite=Trueで上書き)
+            cloudinary.uploader.upload(
+                file,
+                folder="30_fes",
+                public_id=f"item_{item_id}",
+                overwrite=True
+            )
         except Exception as e:
             print(f"アップロードエラー: {e}")
             
