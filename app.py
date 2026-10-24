@@ -23,7 +23,7 @@ def get_bingo_items():
     items = {i: {"id": i, "title": f"お題 {i}", "image_url": None} for i in range(1, 31)}
     
     try:
-        # '30_fes' フォルダ内のリソース（画像）を最大30件取得
+        # '30_fes' フォルダ内のリソース（画像）を最大50件取得
         result = cloudinary.api.resources(
             type="upload",
             prefix="30_fes/",
@@ -46,10 +46,18 @@ def get_bingo_items():
 
 @app.route('/')
 def index():
-    # アクセスのたびにCloudinaryから最新の状態を取得するため、リロードでデータが消えません
     bingo_items = get_bingo_items()
     completed_count = sum(1 for item in bingo_items.values() if item["image_url"] is not None)
     return render_template('index.html', items=bingo_items.values(), completed_count=completed_count)
+
+@app.route('/delete/<int:item_id>', methods=['POST'])
+def delete_image(item_id):
+    try:
+        # 正しいパス指定でCloudinaryから画像を削除
+        cloudinary.uploader.destroy(f"30_fes/item_{item_id}")
+    except Exception as e:
+        print(f"削除エラー: {e}")
+    return redirect(url_for('index'))
 
 @app.route('/upload/<int:item_id>', methods=['POST'])
 def upload(item_id):
@@ -62,7 +70,6 @@ def upload(item_id):
     
     if file:
         try:
-            # 30_fesフォルダに "item_1", "item_2" などの固定IDで保存 (overwrite=Trueで上書き)
             cloudinary.uploader.upload(
                 file,
                 folder="30_fes",
