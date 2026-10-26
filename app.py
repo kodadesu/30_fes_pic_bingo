@@ -4,6 +4,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
+import requests
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -59,6 +60,37 @@ def delete_image(item_id):
         print(f"削除エラー: {e}")
     return redirect(url_for('index'))
 
+
+# LINEにプッシュ通知を送る関数
+def send_line_notification(item_id):
+    access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    user_id = os.getenv("LINE_USER_ID")
+    
+    if not access_token or not user_id:
+        return # 設定されていない場合は何もしない
+
+    url = "https://api.line.me/v2/bot/message/push"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+    data = {
+        "to": user_id,
+        "messages": [
+            {
+                "type": "text",
+                "text": f"📸 30 Fes BINGO\nお題 {item_id} の写真がアップロードされました！"
+            }
+        ]
+    }
+    
+    try:
+        requests.post(url, headers=headers, json=data)
+    except Exception as e:
+        print(f"LINE通知エラー: {e}")
+
+
+# アップロード処理 ＆ LINE通知
 @app.route('/upload/<int:item_id>', methods=['POST'])
 def upload(item_id):
     if 'image' not in request.files:
@@ -76,6 +108,10 @@ def upload(item_id):
                 public_id=f"item_{item_id}",
                 overwrite=True
             )
+            
+            # ★ アップロード成功後にLINE通知を送る！
+            send_line_notification(item_id)
+            
         except Exception as e:
             print(f"アップロードエラー: {e}")
             
