@@ -5,6 +5,7 @@ import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
 import requests
+from flask import request, abort
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -89,6 +90,24 @@ def send_line_notification(item_id):
     except Exception as e:
         print(f"LINE通知エラー: {e}")
 
+
+# 友だち追加やメッセージ送信があったときにLINEから自動で呼び出される窓口（Webhook）
+@app.route('/callback', methods=['POST'])
+def callback():
+    body = request.get_json(silent=True)
+    if not body:
+        return 'OK'
+    
+    events = body.get('events', [])
+    for event in events:
+        # メッセージが送信されてきた場合
+        if event.get('type') == 'message':
+            user_id = event.get('source', {}).get('userId')
+            print("========================================")
+            print(f"★ 取得したお友達のユーザーID: {user_id}")
+            print("========================================")
+            
+    return 'OK'
 
 # アップロード処理 ＆ LINE通知
 @app.route('/upload/<int:item_id>', methods=['POST'])
