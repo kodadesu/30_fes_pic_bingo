@@ -8,7 +8,6 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
         
-        /* トップのメインバナー画像エリア */
         .header-banner {
             width: 100%;
             max-height: 250px;
@@ -32,7 +31,6 @@
         h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 22px; }
         p.subtitle { color: #666; font-size: 12px; margin-top: 2px; margin-bottom: 12px; }
         
-        /* 進捗コンテナ & ダウンロードボタン */
         .progress-container {
             max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 12px 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
@@ -49,7 +47,6 @@
         .progress-bar { background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden; }
         .progress-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
 
-        /* グリッドレイアウト（横5列固定） */
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -58,21 +55,13 @@
             margin: 0 auto;
         }
         
-        /* フォームとラベルも完全に正方形を維持する設定 */
         .grid-form {
             width: 100%;
             aspect-ratio: 1 / 1;
             margin: 0;
             padding: 0;
         }
-        .grid-label {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
 
-        /* カードの共通スタイル (必ず1:1の正方形にする) */
         .card {
             width: 100%;
             height: 100%;
@@ -88,7 +77,6 @@
             overflow: hidden;
         }
         
-        /* 未登録（丸型数字＋アップロードボタン） */
         .photo-area {
             width: 38px; height: 38px; border-radius: 50%; overflow: hidden; margin-top: 2px;
             background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;
@@ -104,7 +92,6 @@
             white-space: nowrap;
         }
 
-        /* 登録済み（completed） */
         .card.completed { 
             border-color: #27ae60; 
             padding: 0;
@@ -134,7 +121,6 @@
 
         input[type="file"] { display: none; }
 
-        /* 背景カラーバリエーション */
         .bg-blue { background-color: #cce0ff; }
         .bg-yellow { background-color: #fff3bf; }
         .bg-purple { background-color: #d0bfff; }
@@ -146,7 +132,6 @@
 </head>
 <body>
 
-    <!-- ヘッダーバナーエリア -->
     <div class="header-banner">
         <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
     </div>
@@ -158,9 +143,8 @@
         <div class="progress-container">
             <div class="progress-header">
                 <span class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</span>
-                <!-- 合成画像ダウンロードボタン -->
                 <button id="downloadBingoBtn" class="download-btn" onclick="generateBingoImage()" {% if completed_count == 0 %}disabled{% endif %}>
-                    画像として保存 
+                    画像保存 
                 </button>
             </div>
             <div class="progress-bar">
@@ -180,27 +164,40 @@
                 {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
                 {% endif %}
 
-            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" class="grid-form">
-                <label class="grid-label">
-                    <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
-                        {% if item.image_url %}
-                            <img src="{{ item.image_url }}" alt="Photo" class="full-photo" data-src="{{ item.image_url }}" data-id="{{ item.id }}">
-                            <div class="overlay-change">変更</div>
-                        {% else %}
-                            <div class="photo-area">
-                                <span class="number-display">{{ item.id }}</span>
-                            </div>
-                            <span class="upload-btn">アップロード</span>
-                        {% endif %}
-                    </div>
-                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
-                </label>
-            </form>
+            <div class="grid-form">
+                <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
+                    {% if item.image_url %}
+                        <!-- 写真がある場合：カード全体をタップして変更可能にするフォーム -->
+                        <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
+                            <label style="display:block; width:100%; height:100%; cursor:pointer; position:relative;">
+                                <img src="{{ item.image_url }}" alt="Photo" class="full-photo" data-src="{{ item.image_url }}" data-id="{{ item.id }}">
+                                <div class="overlay-change">変更</div>
+                                <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                            </label>
+                        </form>
+                        <!-- 削除ボタン（右上に配置） -->
+                        <form action="/delete/{{ item.id }}" method="POST" style="position: absolute; top: 3px; right: 3px; z-index: 10;" onsubmit="return confirm('この写真を削除しますか？');">
+                            <button type="submit" style="background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+                        </form>
+                    {% else %}
+                        <!-- 未登録の場合 -->
+                        <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
+                            <label style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; height: 100%; cursor: pointer; padding: 4px;">
+                                <div class="photo-area">
+                                    <span class="number-display">{{ item.id }}</span>
+                                </div>
+                                <span class="upload-btn">アップロード</span>
+                                <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                            </label>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
 
- <!-- プレビュー表示用のモーダル画面（最初や非表示） -->
+    <!-- プレビュー表示用モーダル -->
     <div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px;">
         <div style="background: white; padding: 15px; border-radius: 12px; max-width: 90%; max-height: 85vh; text-align: center; position: relative; overflow-y: auto;">
             <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #2c3e50;">👇 画像を長押しして「写真に保存」してください</p>
@@ -219,7 +216,7 @@
 
             const cols = 5;
             const rows = 6;
-            const cardSize = 300; // 高画質化のため1マス 300x300px
+            const cardSize = 300;
             const gap = 10;
             const headerHeight = 150;
 
@@ -228,17 +225,14 @@
             canvas.height = rows * cardSize + (rows + 1) * gap + headerHeight;
             const ctx = canvas.getContext('2d');
 
-            // 背景描画
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // タイトル描画
             ctx.fillStyle = '#2c3e50';
             ctx.font = 'bold italic 48px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('30 Fes PHOTO BINGO', canvas.width / 2, 90);
 
-            // 1〜30マスの描画処理
             const cards = document.querySelectorAll('.card');
             
             for (let index = 0; index < cards.length; index++) {
@@ -258,7 +252,7 @@
                 if (imgElement) {
                     try {
                         const img = new Image();
-                        img.crossOrigin = 'Anonymous'; // CORS対策
+                        img.crossOrigin = 'Anonymous';
                         img.src = imgElement.getAttribute('data-src');
                         await new Promise((resolve, reject) => {
                             img.onload = resolve;
@@ -290,12 +284,11 @@
                 ctx.restore();
             }
 
-            // Canvasを画像URL（DataURL）に変換してモーダルに表示する
             const dataUrl = canvas.toDataURL('image/png');
             document.getElementById('previewImage').src = dataUrl;
             document.getElementById('imageModal').style.display = 'flex';
 
-            btn.innerText = '画像として保存 ';
+            btn.innerText = '画像保存 ';
             btn.disabled = false;
         }
 

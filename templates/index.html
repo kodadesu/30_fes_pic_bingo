@@ -6,33 +6,57 @@
     <title>30 Fes PHOTO BINGO</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; text-align: center; }
-        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px 10px; 
+            /* グラスモーフィズムに映える爽やかなパステルグラデーション背景 */
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #fbc2eb 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            text-align: center; 
+        }
+
+        /* グラスモーフィズム（すりガラス風）のメインコンテナ */
+        .glass-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.45); /* 半透明の白 */
+            backdrop-filter: blur(12px);            /* すりガラスのぼかし効果 */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6); /* うっすら白いフチ */
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 柔らかな立体感の影 */
+        }
+       
         .header-banner {
             width: 100%;
-            max-height: 250px;
+            max-height: 1050px;
             background-color: #f0f0f0;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 16px;
+            margin-bottom: 12px;
         }
         .header-banner img {
             width: 100%;
             height: 100%;
-            max-height: 250px;
+            max-height: 1050px;
             object-fit: contain;
         }
 
         .content-wrap {
-            padding: 12px;
+            padding: 4px;
         }
 
         h1 { color: #2c3e50; margin: 5px 0 0 0; font-style: italic; font-size: 22px; }
-        p.subtitle { color: #666; font-size: 12px; margin-top: 2px; margin-bottom: 12px; }
+        p.subtitle { color: #555; font-size: 12px; margin-top: 2px; margin-bottom: 12px; }
         
         .progress-container {
-            max-width: 600px; margin: 0 auto 15px auto; background: #fff; padding: 12px 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 100%; margin: 0 auto 15px auto; background: rgba(255, 255, 255, 0.7); padding: 12px 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .progress-header {
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
@@ -51,7 +75,7 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 6px;
-            max-width: 600px;
+            width: 100%;
             margin: 0 auto;
         }
         
@@ -121,6 +145,7 @@
 
         input[type="file"] { display: none; }
 
+        /* ビンゴタイルの色（そのまま維持） */
         .bg-blue { background-color: #cce0ff; }
         .bg-yellow { background-color: #fff3bf; }
         .bg-purple { background-color: #d0bfff; }
@@ -132,169 +157,74 @@
 </head>
 <body>
 
-    <div class="header-banner">
-        <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
-    </div>
+    <!-- グラスモーフィズム（すりガラス風）のラッピング枠 -->
+    <div class="glass-wrapper">
 
-    <div class="content-wrap">
-        <h1>30 Fes PHOTO BINGO</h1>
-        <p class="subtitle">撮った写真をuploadしてください！</p>
-
-        <div class="progress-container">
-            <div class="progress-header">
-                <span class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</span>
-                <button id="downloadBingoBtn" class="download-btn" onclick="generateBingoImage()" {% if completed_count == 0 %}disabled{% endif %}>
-                    画像保存 
-                </button>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
-            </div>
+        <div class="header-banner">
+            <img src="{{ url_for('static', filename='S__127295501.jpg') }}" alt="Main Banner Photo">
         </div>
 
-        <div class="grid">
-            {% for item in items %}
-                {% set color_class = "bg-blue" %}
-                {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
-                {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
-                {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
-                {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
-                {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
-                {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
-                {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
-                {% endif %}
+        <div class="content-wrap">
+            <h1>30 Fes PHOTO BINGO</h1>
+            <p class="subtitle">撮った写真をuploadしてください！</p>
 
-            <div class="grid-form">
-                <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
-                    {% if item.image_url %}
-                        <!-- 写真がある場合：カード全体をタップして変更可能にするフォーム -->
-                        <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
-                            <label style="display:block; width:100%; height:100%; cursor:pointer; position:relative;">
-                                <img src="{{ item.image_url }}" alt="Photo" class="full-photo" data-src="{{ item.image_url }}" data-id="{{ item.id }}">
-                                <div class="overlay-change">変更</div>
-                                <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
-                            </label>
-                        </form>
-                        <!-- 削除ボタン（右上に配置） -->
-                        <form action="/delete/{{ item.id }}" method="POST" style="position: absolute; top: 3px; right: 3px; z-index: 10;" onsubmit="return confirm('この写真を削除しますか？');">
-                            <button type="submit" style="background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
-                        </form>
-                    {% else %}
-                        <!-- 未登録の場合 -->
-                        <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
-                            <label style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; height: 100%; cursor: pointer; padding: 4px;">
-                                <div class="photo-area">
-                                    <span class="number-display">{{ item.id }}</span>
-                                </div>
-                                <span class="upload-btn">アップロード</span>
-                                <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
-                            </label>
-                        </form>
-                    {% endif %}
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span class="progress-text">{{ completed_count }} / 30 PHOTOS アップロード済み</span>
+                    <button id="downloadBingoBtn" class="download-btn" onclick="generateBingoImage()" {% if completed_count == 0 %}disabled{% endif %}>
+                        画像保存 
+                    </button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (completed_count / 30) * 100 }}%;"></div>
                 </div>
             </div>
-            {% endfor %}
+
+            <div class="grid">
+                {% for item in items %}
+                    {% set color_class = "bg-blue" %}
+                    {% if item.id in [1, 2, 3, 26, 27] %}{% set color_class = "bg-blue" %}
+                    {% elif item.id in [4, 7, 11, 14, 17, 19, 24, 28, 29, 30] %}{% set color_class = "bg-purple" %}
+                    {% elif item.id in [5, 12, 23, 25] %}{% set color_class = "bg-orange" %}
+                    {% elif item.id in [6, 15, 21] %}{% set color_class = "bg-yellow" %}
+                    {% elif item.id in [8, 9, 22] %}{% set color_class = "bg-pink" %}
+                    {% elif item.id in [10, 16, 18] %}{% set color_class = "bg-green" %}
+                    {% elif item.id in [13, 20] %}{% set color_class = "bg-red" %}
+                    {% endif %}
+
+                <div class="grid-form">
+                    <div class="card {{ color_class }} {% if item.image_url %}completed{% endif %}">
+                        {% if item.image_url %}
+                            <!-- 写真がある場合 -->
+                            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
+                                <label style="display:block; width:100%; height:100%; cursor:pointer; position:relative;">
+                                    <img src="{{ item.image_url }}" alt="Photo" class="full-photo" data-src="{{ item.image_url }}" data-id="{{ item.id }}">
+                                    <div class="overlay-change">変更</div>
+                                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                                </label>
+                            </form>
+                            <!-- 削除ボタン -->
+                            <form action="/delete/{{ item.id }}" method="POST" style="position: absolute; top: 3px; right: 3px; z-index: 10;" onsubmit="return confirm('この写真を削除しますか？');">
+                                <button type="submit" style="background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+                            </form>
+                        {% else %}
+                            <!-- 未登録の場合 -->
+                            <form action="/upload/{{ item.id }}" method="POST" enctype="multipart/form-data" style="width:100%; height:100%; margin:0;">
+                                <label style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; height: 100%; cursor: pointer; padding: 4px;">
+                                    <div class="photo-area">
+                                        <span class="number-display">{{ item.id }}</span>
+                                    </div>
+                                    <span class="upload-btn">アップロード</span>
+                                    <input type="file" name="image" accept="image/*" onchange="this.form.submit()">
+                                </label>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
     <!-- プレビュー表示用モーダル -->
-    <div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px;">
-        <div style="background: white; padding: 15px; border-radius: 12px; max-width: 90%; max-height: 85vh; text-align: center; position: relative; overflow-y: auto;">
-            <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #2c3e50;">👇 画像を長押しして「写真に保存」してください</p>
-            <img id="previewImage" src="" alt="Bingo Collage" style="width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; border: 1px solid #ddd;">
-            <br>
-            <button onclick="closeModal()" style="margin-top: 12px; background: #e74c3c; color: white; border: none; padding: 8px 20px; font-size: 14px; border-radius: 20px; font-weight: bold; cursor: pointer;">閉じる</button>
-        </div>
-    </div>
-
-    <!-- 合成処理用JavaScript -->
-    <script>
-        async function generateBingoImage() {
-            const btn = document.getElementById('downloadBingoBtn');
-            btn.innerText = '作成中...';
-            btn.disabled = true;
-
-            const cols = 5;
-            const rows = 6;
-            const cardSize = 300;
-            const gap = 10;
-            const headerHeight = 150;
-
-            const canvas = document.createElement('canvas');
-            canvas.width = cols * cardSize + (cols + 1) * gap;
-            canvas.height = rows * cardSize + (rows + 1) * gap + headerHeight;
-            const ctx = canvas.getContext('2d');
-
-            ctx.fillStyle = '#f8f9fa';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold italic 48px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('30 Fes PHOTO BINGO', canvas.width / 2, 90);
-
-            const cards = document.querySelectorAll('.card');
-            
-            for (let index = 0; index < cards.length; index++) {
-                const card = cards[index];
-                const col = index % cols;
-                const row = Math.floor(index / cols);
-                const x = gap + col * (cardSize + gap);
-                const y = headerHeight + gap + row * (cardSize + gap);
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.roundRect(x, y, cardSize, cardSize, 20);
-                ctx.clip();
-
-                const imgElement = card.querySelector('img.full-photo');
-                
-                if (imgElement) {
-                    try {
-                        const img = new Image();
-                        img.crossOrigin = 'Anonymous';
-                        img.src = imgElement.getAttribute('data-src');
-                        await new Promise((resolve, reject) => {
-                            img.onload = resolve;
-                            img.onerror = resolve; 
-                        });
-                        
-                        const scale = Math.max(cardSize / img.width, cardSize / img.height);
-                        const sw = img.width * scale;
-                        const sh = img.height * scale;
-                        ctx.drawImage(img, x + (cardSize - sw) / 2, y + (cardSize - sh) / 2, sw, sh);
-                    } catch (e) {
-                        console.error('Image load error', e);
-                    }
-                } else {
-                    ctx.fillStyle = '#e0e0e0';
-                    ctx.fillRect(x, y, cardSize, cardSize);
-                    
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(x + cardSize / 2, y + cardSize / 2 - 20, 50, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.font = 'bold 45px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(index + 1, x + cardSize / 2, y + cardSize / 2 - 20);
-                }
-                ctx.restore();
-            }
-
-            const dataUrl = canvas.toDataURL('image/png');
-            document.getElementById('previewImage').src = dataUrl;
-            document.getElementById('imageModal').style.display = 'flex';
-
-            btn.innerText = '画像保存 ';
-            btn.disabled = false;
-        }
-
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+    <div id="imageModal" style="display: none; position: fixed; top: 0; left: 0;
