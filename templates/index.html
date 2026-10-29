@@ -19,14 +19,15 @@
 
         /* グラスモーフィズム（すりガラス風）のメインコンテナ */
         .glass-wrapper {
+            width: 95%; /* スマホ画面に合わせて可変にする */
             max-width: 600px;
-            margin: 0 auto;
-            padding: 15px;
+            margin: 10px auto;
+            padding: 10px; /* 内部の余白を少しスリムにする */
             background: rgba(255, 255, 255, 0.45); /* 半透明の白 */
             backdrop-filter: blur(12px);            /* すりガラスのぼかし効果 */
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6); /* うっすら白いフチ */
-            border-radius: 24px;
+            border-radius: 20px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 柔らかな立体感の影 */
         }
        
@@ -74,7 +75,7 @@
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            gap: 4px; /* カード同士の隙間を少し狭めてスマホに収まりやすくする */
             width: 100%;
             margin: 0 auto;
         }
